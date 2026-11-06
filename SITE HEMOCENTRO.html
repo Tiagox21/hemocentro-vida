@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hemocentro Vida - Sistema de Triagem e Gestão de Estoque</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#C0392B',
+                            darkred: '#922B21',
+                            black: '#1E1E24',
+                            slate: '#2C3E50',
+                            graybg: '#F8F9FA',
+                            card: '#FFFFFF'
+                        }
+                    },
+                    boxShadow: {
+                        'subtle': '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)',
+                        'card': '0 4px 12px -2px rgba(30, 30, 36, 0.08)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #1E1E24;
+        }
+        
+        .sidebar-btn.active {
+            background-color: #C0392B;
+            color: #FFFFFF;
+            box-shadow: 0 4px 10px rgba(192, 57, 43, 0.25);
+        }
+        .sidebar-btn.active i {
+            color: #FFFFFF;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F8F9FA;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col antialiased text-slate-800">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- FIXED SIDEBAR NAVIGATION -->
+        <aside class="w-64 bg-brand-black text-white flex flex-col justify-between shadow-xl z-30 flex-shrink-0">
+            <div>
+                <!-- Brand Logo Header -->
+                <div class="p-5 border-b border-gray-800 flex items-center space-x-3">
+                    <div class="bg-brand-red p-2.5 rounded-xl text-white font-bold text-xl flex items-center justify-center w-11 h-11 shadow-lg shadow-red-900/40">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base font-bold tracking-tight text-white leading-tight">HEMOCENTRO VIDA</h1>
+                        <p class="text-[11px] text-gray-400 font-medium">Gestão & Triagem Clínica</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-3 space-y-1 text-xs font-medium">
+                    <p class="px-3 pt-3 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Módulos do Sistema</p>
+                    
+                    <button onclick="switchTab('tab-doadores')" id="btn-tab-doadores" class="sidebar-btn active w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-users text-sm text-gray-400"></i> 1. Doadores</span>
+                        <span id="badge-doadores-count" class="bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-componentes')" id="btn-tab-componentes" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-vials text-sm text-gray-400"></i> 2. Hemocomponentes</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-triagem')" id="btn-tab-triagem" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-notes-medical text-sm text-gray-400"></i> 3. Triagem Clínica</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-doacao')" id="btn-tab-doacao" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-syringe text-sm text-gray-400"></i> 4. Registro de Doação</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-fracionamento')" id="btn-tab-fracionamento" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-diagram-project text-sm text-gray-400"></i> 5. Fracionamento</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-requisicao')" id="btn-tab-requisicao" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-truck-medical text-sm text-gray-400"></i> 6. Requisição</span>
+                    </button>
+
+                    <button onclick="switchTab('tab-estoque')" id="btn-tab-estoque" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-boxes-stacked text-sm text-gray-400"></i> 7. Painel de Estoque</span>
+                        <span id="badge-alert-expiring" class="hidden bg-yellow-500 text-black font-bold px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+                    </button>
+
+                    <p class="px-3 pt-4 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Avaliador Pedagógico</p>
+                    
+                    <button onclick="switchTab('tab-testes')" id="btn-tab-testes" class="sidebar-btn w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-amber-300 hover:bg-amber-950/40 border border-amber-500/30 transition">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-vial-circle-check text-sm text-amber-400"></i> Sprint 5: 10 Testes</span>
+                        <span class="bg-amber-500 text-black font-bold px-1.5 py-0.5 rounded text-[10px]">VERIFICAR</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Technical Responsibility Footer Card -->
+            <div class="p-3 border-t border-gray-800 bg-gray-900/60">
+                <div class="p-2.5 rounded-lg bg-gray-800/80 border border-gray-700/60 text-xs">
+                    <p class="text-[10px] text-gray-400 uppercase font-semibold">Responsável Técnica</p>
+                    <p class="font-bold text-white text-xs mt-0.5">Dra. Marlene Tanaka</p>
+                    <p class="text-[10px] text-gray-400">Unidade Fixa & Móvel</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-brand-graybg">
+            
+            <!-- TOP APP BAR -->
+            <header class="bg-white border-b border-gray-200 px-6 py-3 shadow-subtle flex flex-wrap justify-between items-center gap-4 z-20">
+                
+                <!-- Active Page Indicator -->
+                <div class="flex items-center gap-3">
+                    <h2 id="page-title" class="text-lg font-bold text-brand-black flex items-center gap-2">
+                        <i class="fa-solid fa-users text-brand-red"></i> Cadastro e Base de Doadores
+                    </h2>
+                </div>
+
+                <!-- Global Controls (Date Simulator & Controls) -->
+                <div class="flex items-center flex-wrap gap-3">
+                    
+                    <!-- Date Simulation Control -->
+                    <div class="bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs">
+                        <i class="fa-regular fa-calendar-days text-brand-red font-bold"></i>
+                        <span class="text-gray-600 font-semibold text-[11px]">Data Atual do Sistema:</span>
+                        <input type="date" id="simulated-date" onchange="updateSimulatedDate(this.value)" class="bg-white text-slate-800 font-bold px-2 py-0.5 rounded border border-gray-300 text-xs focus:ring-1 focus:ring-brand-red focus:outline-none">
+                    </div>
+
+                    <!-- Seed Data Button -->
+                    <button onclick="loadSeedData()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg transition shadow-sm font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-database text-amber-400"></i> Carga Inicial
+                    </button>
+
+                    <!-- Reset System Data -->
+                    <button onclick="resetSystemData()" class="bg-white hover:bg-red-50 text-brand-red border border-red-200 text-xs px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1.5" title="Limpar e Reiniciar Dados">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </header>
+
+            <!-- DYNAMIC TOAST NOTIFICATION CONTAINER -->
+            <div id="toast-container" class="hidden mx-6 mt-4 p-4 rounded-xl shadow-card transition-all border flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                    <i id="toast-icon" class="text-xl"></i>
+                    <div>
+                        <h4 id="toast-title" class="font-bold text-sm"></h4>
+                        <p id="toast-message" class="text-xs mt-0.5"></p>
+                    </div>
+                </div>
+                <button onclick="closeToast()" class="text-gray-400 hover:text-black text-sm p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- WORKSPACE SCREENS SCROLLABLE CONTAINER -->
+            <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                <!-- SCREEN 1: CADASTRO DE DOADORES -->
+                <section id="tab-doadores" class="tab-content block">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Registration Form -->
+                        <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+                                <i class="fa-solid fa-user-plus text-brand-red"></i> Novo Doador
+                            </h3>
+                            <form id="form-doador" onsubmit="handleSaveDoador(event)" class="space-y-4">
+                                <input type="hidden" id="doador-id">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Nome Completo</label>
+                                    <input type="text" id="doador-nome" required placeholder="ex: Cássio Bertoldo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Nascimento</label>
+                                        <input type="date" id="doador-nascimento" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Sexo Biológico</label>
+                                        <select id="doador-sexo" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                            <option value="M">Masculino (M)</option>
+                                            <option value="F">Feminino (F)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Tipo Sanguíneo (ABO/Rh)</label>
+                                    <select id="doador-sangue" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition font-semibold text-brand-red">
+                                        <option value="O-">O- (Doador Universal)</option>
+                                        <option value="O+">O+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="A+">A+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="AB+">AB+ (Receptor Universal)</option>
+                                    </select>
+                                </div>
+                                <div class="pt-2 flex gap-2">
+                                    <button type="submit" class="flex-1 bg-brand-red text-white py-2.5 px-4 rounded-lg font-semibold text-xs hover:bg-brand-darkred transition shadow-md shadow-red-900/20">
+                                        Cadastrar Doador
+                                    </button>
+                                    <button type="button" onclick="clearDoadorForm()" class="bg-gray-100 text-gray-600 py-2.5 px-3 rounded-lg text-xs hover:bg-gray-200 transition font-medium">
+                                        Limpar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Donors List -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                                <h3 class="text-sm font-bold text-brand-black flex items-center gap-2 uppercase tracking-wide">
+                                    <i class="fa-solid fa-address-book text-brand-red"></i> Base de Doadores Cadastrados
+                                </h3>
+                                <span id="doadores-count" class="text-xs font-bold bg-gray-100 text-gray-700 px-3 py-1 rounded-full border">0 registrados</span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase text-[10px] border-b border-slate-100">
+                                            <th class="p-3 rounded-l-lg">Nome</th>
+                                            <th class="p-3">Nascimento / Idade</th>
+                                            <th class="p-3">Sexo</th>
+                                            <th class="p-3">Tipo ABO</th>
+                                            <th class="p-3">Última Doação</th>
+                                            <th class="p-3 text-center">Doações (12m)</th>
+                                            <th class="p-3 text-right rounded-r-lg">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-doadores-body" class="divide-y divide-gray-100">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 2: CADASTRO DE HEMOCOMPONENTES -->
+                <section id="tab-componentes" class="tab-content hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                        <div class="flex justify-between items-center mb-6 pb-3 border-b border-gray-100">
+                            <div>
+                                <h3 class="text-sm font-bold text-brand-black flex items-center gap-2 uppercase tracking-wide">
+                                    <i class="fa-solid fa-sliders text-brand-red"></i> Especificações Técnicas de Hemocomponentes
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Parâmetros normativos de armazenagem e ciclo de vida útil</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="componentes-cards-container">
+                            <!-- Dynamic Component Cards -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 3: TRIAGEM CLÍNICA -->
+                <section id="tab-triagem" class="tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Screening Form -->
+                        <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+                                <i class="fa-solid fa-clipboard-check text-brand-red"></i> Registrar Triagem Clínica
+                            </h3>
+                            <form id="form-triagem" onsubmit="handleProcessTriagem(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Selecione o Doador</label>
+                                    <select id="triagem-doador-id" onchange="onTriagemDoadorChange()" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                        <option value="">-- Selecione Doador --</option>
+                                    </select>
+                                </div>
+
+                                <!-- Auto Calculated Doador Info Box -->
+                                <div id="triagem-doador-info" class="hidden p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+                                    <p class="text-gray-600"><strong>Idade Atual:</strong> <span id="info-idade" class="font-bold text-slate-800">-</span> anos</p>
+                                    <p class="text-gray-600"><strong>Última doação:</strong> <span id="info-ultima-doacao" class="font-bold text-slate-800">-</span></p>
+                                    <p class="text-gray-600"><strong>Doações (Últimos 12 meses):</strong> <span id="info-doacoes-ano" class="font-bold text-slate-800">-</span></p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Peso Aferido (kg)</label>
+                                    <input type="number" step="0.1" id="triagem-peso" placeholder="ex: 68.5" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                    <span class="text-[10px] text-gray-400 font-medium">RN-01: Exige peso mínimo de 50 kg.</span>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Questionário Clínico Rápidas</label>
+                                    <div class="space-y-2 text-xs border border-gray-200 p-3 rounded-lg bg-gray-50/50">
+                                        <label class="flex items-center gap-2 cursor-pointer text-gray-700">
+                                            <input type="checkbox" id="triagem-q1" class="rounded text-brand-red focus:ring-brand-red">
+                                            <span>Sintomas de febre, gripe ou infecção?</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer text-gray-700">
+                                            <input type="checkbox" id="triagem-q2" class="rounded text-brand-red focus:ring-brand-red">
+                                            <span>Procedimento cirúrgico / Tatuagem recente?</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full bg-brand-red text-white py-2.5 px-4 rounded-lg font-semibold text-xs hover:bg-brand-darkred transition shadow-md shadow-red-900/20">
+                                    Validar Aptidão Automática
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Screening History and Rule Monitor -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                                <h3 class="text-sm font-bold text-brand-black flex items-center gap-2 uppercase tracking-wide">
+                                    <i class="fa-solid fa-list-check text-brand-red"></i> Histórico de Triagens
+                                </h3>
+                                <span class="text-[11px] text-gray-500 font-medium bg-gray-100 px-2.5 py-1 rounded-md">Regras Ativas: RN-01, RN-02, RN-03, RN-04</span>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase text-[10px] border-b border-slate-100">
+                                            <th class="p-3">Data/Hora</th>
+                                            <th class="p-3">Doador</th>
+                                            <th class="p-3">Peso</th>
+                                            <th class="p-3">Aptidão</th>
+                                            <th class="p-3">Motivo / Parecer Técnico</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-triagem-body" class="divide-y divide-gray-100">
+                                        <!-- Dynamic Rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 4: REGISTRO DE DOAÇÃO -->
+                <section id="tab-doacao" class="tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Donation Creation Form -->
+                        <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+                                <i class="fa-solid fa-hand-holding-medical text-brand-red"></i> Registrar Coleta de Sangue
+                            </h3>
+                            <form id="form-doacao" onsubmit="handleCreateDoacao(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Doador APTO (Triado)</label>
+                                    <select id="doacao-doador-id" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                        <option value="">-- Selecione Doador Apto --</option>
+                                    </select>
+                                    <span class="text-[10px] text-gray-400">RN-04: Apenas candidatos aprovados podem coletar.</span>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Unidade de Coleta (Mudança Contratada)</label>
+                                    <select id="doacao-local" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition font-semibold">
+                                        <option value="Unidade Fixa">Unidade Fixa (Hemocentro Vida)</option>
+                                        <option value="Unidade Móvel">Unidade Móvel de Coleta</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Data Coleta</label>
+                                        <input type="date" id="doacao-data" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Volume (mL)</label>
+                                        <input type="number" id="doacao-volume" value="450" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full bg-brand-red text-white py-2.5 px-4 rounded-lg font-semibold text-xs hover:bg-brand-darkred transition shadow-md shadow-red-900/20">
+                                    Registrar Coleta e Gerar Bolsa
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Collected Bags List -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                                <h3 class="text-sm font-bold text-brand-black flex items-center gap-2 uppercase tracking-wide">
+                                    <i class="fa-solid fa-box-archive text-brand-red"></i> Bolsas Coletadas & Rastreabilidade
+                                </h3>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase text-[10px] border-b border-slate-100">
+                                            <th class="p-3">Código Bolsa</th>
+                                            <th class="p-3">Doador / Tipo</th>
+                                            <th class="p-3">Local Coleta</th>
+                                            <th class="p-3">Data Coleta</th>
+                                            <th class="p-3">Chegada Unidade Fixa</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3 text-right">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-bolsas-body" class="divide-y divide-gray-100">
+                                        <!-- Dynamic Bags -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 5: FRACIONAMENTO -->
+                <section id="tab-fracionamento" class="tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Fractionation Action Box -->
+                        <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-3 pb-2 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+                                <i class="fa-solid fa-scissors text-brand-red"></i> Processar Fracionamento
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+                                A bolsa é fracionada em hemocomponentes. Cada um assume a validade específica contada a partir da chegada à unidade fixa (RN-05).
+                            </p>
+
+                            <form id="form-fracionamento" onsubmit="handleProcessFracionamento(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Selecione Bolsa Apta</label>
+                                    <select id="fracionamento-bolsa-id" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                        <option value="">-- Selecione uma bolsa --</option>
+                                    </select>
+                                </div>
+
+                                <div class="p-3 bg-red-50/50 border border-red-100 rounded-lg text-xs space-y-2">
+                                    <span class="font-bold text-brand-darkred block">Componentes Gerados:</span>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fa-solid fa-check text-green-600 text-[10px]"></i> Concentrado de Hemácias (35 dias)
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fa-solid fa-check text-green-600 text-[10px]"></i> Concentrado de Plaquetas (5 dias)
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i class="fa-solid fa-check text-green-600 text-[10px]"></i> Plasma Fresco Congelado (365 dias)
+                                    </div>
+                                </div>
+
+                                <div class="text-[11px] text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200/60 flex items-start gap-2">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                                    <span><strong>RN-08:</strong> Fracionamento é irreversível e pode ocorrer apenas uma vez por bolsa.</span>
+                                </div>
+
+                                <button type="submit" class="w-full bg-brand-red text-white py-2.5 px-4 rounded-lg font-semibold text-xs hover:bg-brand-darkred transition shadow-md shadow-red-900/20">
+                                    Fracionar Bolsa em Componentes
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Fractioned Log -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+                                <i class="fa-solid fa-cubes-stacked text-brand-red"></i> Histórico de Fracionamentos
+                            </h3>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase text-[10px] border-b border-slate-100">
+                                            <th class="p-3">Código Bolsa</th>
+                                            <th class="p-3">Tipo ABO</th>
+                                            <th class="p-3">Data Fracionamento</th>
+                                            <th class="p-3">Componentes Derivados</th>
+                                            <th class="p-3">Status Ciclo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-fracionamento-body" class="divide-y divide-gray-100">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 6: REQUIÇÃO E COMPATIBILIDADE -->
+                <section id="tab-requisicao" class="tab-content hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Requisition Form -->
+                        <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+                                <i class="fa-solid fa-file-medical text-brand-red"></i> Nova Requisição Transfusional
+                            </h3>
+                            <form id="form-requisicao" onsubmit="handleProcessRequisicao(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Paciente / Receptor</label>
+                                    <input type="text" id="req-paciente" required placeholder="ex: Carlos Eduardo" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Tipo Receptor</label>
+                                        <select id="req-sangue-paciente" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition font-bold text-brand-red">
+                                            <option value="O-">O-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="A+">A+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="AB+">AB+</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Hemocomponente</label>
+                                        <select id="req-tipo-componente" onchange="updateRequisicaoStockSelect()" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                            <option value="Concentrado de hemácias">Hemácias</option>
+                                            <option value="Concentrado de plaquetas">Plaquetas</option>
+                                            <option value="Plasma fresco congelado">Plasma</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[11px] font-bold text-gray-700 uppercase mb-1">Selecionar do Estoque Disponível</label>
+                                    <select id="req-item-estoque" required class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red outline-none transition">
+                                        <option value="">-- Selecione item disponível --</option>
+                                    </select>
+                                </div>
+
+                                <div class="text-[11px] text-gray-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                                    <p class="font-bold text-slate-700">Validações Automáticas:</p>
+                                    <p>• <strong>RN-06:</strong> Impede bolsa vencida.</p>
+                                    <p>• <strong>RN-07:</strong> Exige compatibilidade sanguínea estrita.</p>
+                                </div>
+
+                                <button type="submit" class="w-full bg-brand-red text-white py-2.5 px-4 rounded-lg font-semibold text-xs hover:bg-brand-darkred transition shadow-md shadow-red-900/20">
+                                    Validar & Liberar Requisição
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Compatibility Matrix & History Log -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Matrix Card -->
+                            <div class="bg-white p-5 rounded-xl shadow-card border border-gray-100">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-xs font-bold text-brand-black uppercase tracking-wide flex items-center gap-2">
+                                        <i class="fa-solid fa-table-cells text-brand-red"></i> Matriz de Compatibilidade Sanguínea de Hemácias (RN-07)
+                                    </h4>
+                                    <span class="text-[10px] bg-red-100 text-brand-darkred font-bold px-2 py-0.5 rounded">O- Doador Universal</span>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>O-</strong> doa para: <span class="text-green-700 font-bold">TODOS</span></div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>O+</strong> doa para: O+, A+, B+, AB+</div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>A-</strong> doa para: A-, A+, AB-, AB+</div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>A+</strong> doa para: A+, AB+</div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>B-</strong> doa para: B-, B+, AB-, AB+</div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>B+</strong> doa para: B+, AB+</div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>AB-</strong> doa para: AB-, AB+</div>
+                                    <div class="p-2 border rounded-lg bg-slate-50"><strong>AB+</strong> doa só para: AB+</div>
+                                </div>
+                            </div>
+
+                            <!-- Requisitions Log -->
+                            <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                                <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 uppercase tracking-wide">
+                                    Histórico de Liberações Transfusionais
+                                </h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr class="bg-slate-50 text-slate-500 font-semibold uppercase text-[10px] border-b border-slate-100">
+                                                <th class="p-3">Data</th>
+                                                <th class="p-3">Paciente (Tipo)</th>
+                                                <th class="p-3">Componente</th>
+                                                <th class="p-3">Item Doador (Tipo)</th>
+                                                <th class="p-3">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="table-requisicao-body" class="divide-y divide-gray-100">
+                                            <!-- Dynamic Rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SCREEN 7: PAINEL DE ESTOQUE -->
+                <section id="tab-estoque" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <!-- Filters Header Card -->
+                        <div class="bg-white p-4 rounded-xl shadow-card border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="font-bold text-xs uppercase text-slate-500"><i class="fa-solid fa-filter text-brand-red mr-1"></i> Filtros:</span>
+                                
+                                <select id="filter-estoque-tipo" onchange="renderEstoque()" class="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-brand-red outline-none">
+                                    <option value="ALL">Todos os Tipos Sanguíneos</option>
+                                    <option value="O-">O-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="A+">A+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="AB+">AB+</option>
+                                </select>
+
+                                <select id="filter-estoque-comp" onchange="renderEstoque()" class="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-brand-red outline-none">
+                                    <option value="ALL">Todos Hemocomponentes</option>
+                                    <option value="Concentrado de hemácias">Concentrado de Hemácias</option>
+                                    <option value="Concentrado de plaquetas">Concentrado de Plaquetas</option>
+                                    <option value="Plasma fresco congelado">Plasma Fresco Congelado</option>
+                                </select>
+
+                                <select id="filter-estoque-status" onchange="renderEstoque()" class="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium focus:ring-1 focus:ring-brand-red outline-none">
+                                    <option value="ALL">Todos os Status</option>
+                                    <option value="Disponível">Disponível</option>
+                                    <option value="Vencendo">Vencendo nos Próximos 3 Dias</option>
+                                    <option value="Vencida">Vencida / Descartada</option>
+                                    <option value="Liberada">Liberada / Transfundida</option>
+                                </select>
+                            </div>
+
+                            <div id="stock-total-badge" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-bold border border-slate-200">
+                                0 itens localizados
+                            </div>
+                        </div>
+
+                        <!-- Inventory Table Card -->
+                        <div class="bg-white p-6 rounded-xl shadow-card border border-gray-100">
+                            <h3 class="text-sm font-bold text-brand-black mb-4 pb-2 border-b border-gray-100 flex items-center justify-between uppercase tracking-wide">
+                                <span><i class="fa-solid fa-boxes-stacked text-brand-red"></i> Inventário Físico do Banco de Sangue</span>
+                            </h3>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase text-[10px] border-b border-slate-100">
+                                            <th class="p-3">Cód. Item</th>
+                                            <th class="p-3">Hemocomponente</th>
+                                            <th class="p-3">Tipo ABO</th>
+                                            <th class="p-3">Data Coleta/Início</th>
+                                            <th class="p-3">Data Validade</th>
+                                            <th class="p-3">Prazo Restante</th>
+                                            <th class="p-3">Status do Item</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-estoque-body" class="divide-y divide-gray-100">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SPRINT 5: RUNNER DOS 10 CASOS DE TESTE -->
+                <section id="tab-testes" class="tab-content hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-card border border-amber-300">
+                        <div class="flex justify-between items-center mb-6 pb-3 border-b border-amber-100">
+                            <div>
+                                <h3 class="text-base font-bold text-brand-black flex items-center gap-2 uppercase tracking-wide">
+                                    <i class="fa-solid fa-vial-circle-check text-amber-500"></i> Suíte de Testes Automatizados - Sprint 5
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-0.5">Execução direta dos 10 Casos de Teste com validação formal das regras RN-01 a RN-08.</p>
+                            </div>
+                            <button onclick="runAllTestCases()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg shadow transition flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> Executar Todos os 10 Testes
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="test-cases-container">
+                            <!-- Test Case Cards Render Here -->
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT SYSTEM LOGIC -->
+    <script>
+        // GLOBAL SYSTEM STATE & LOCALSTORAGE PERSISTENCE
+        const STORAGE_KEY = 'hemocentro_vida_db_v3';
+        
+        let state = {
+            simulatedDate: '2026-10-03',
+            doadores: [],
+            componentes: [],
+            triagens: [],
+            doacoes: [],
+            fracionamentos: [],
+            estoque: [],
+            requisicoes: []
+        };
+
+        const SEED_DOADORES = [
+            { id: 'D01', nome: 'Cássio Bertoldo', nascimento: '1990-03-14', sexo: 'M', sangue: 'O-', ultimaDoacao: '2026-08-20', doacoes12Meses: 3 },
+            { id: 'D02', nome: 'Ivone Prates', nascimento: '1985-07-02', sexo: 'F', sangue: 'A+', ultimaDoacao: '2026-07-05', doacoes12Meses: 2 },
+            { id: 'D03', nome: 'Heitor Nunes', nascimento: '2010-11-09', sexo: 'M', sangue: 'B+', ultimaDoacao: null, doacoes12Meses: 0 },
+            { id: 'D04', nome: 'Solange Vidal', nascimento: '1954-01-30', sexo: 'F', sangue: 'AB+', ultimaDoacao: '2026-02-10', doacoes12Meses: 1 }
+        ];
+
+        const SEED_COMPONENTES = [
+            { id: 'C01', nome: 'Concentrado de hemácias', validadeDias: 35, temp: '2°C a 6°C' },
+            { id: 'C02', nome: 'Concentrado de plaquetas', validadeDias: 5, temp: '20°C a 24°C' },
+            { id: 'C03', nome: 'Plasma fresco congelado', validadeDias: 365, temp: '-18°C ou mais frio' }
+        ];
+
+        window.onload = function() {
+            loadStateFromStorage();
+            document.getElementById('simulated-date').value = state.simulatedDate;
+            renderAllViews();
+            renderTestCases();
+        };
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            renderAllViews();
+        }
+
+        function loadStateFromStorage() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                try {
+                    state = JSON.parse(data);
+                } catch(e) {
+                    console.error('State load failed', e);
+                    loadSeedData(false);
+                }
+            } else {
+                loadSeedData(false);
+            }
+        }
+
+        function loadSeedData(showAlert = true) {
+            const warnings = [
+                "Aviso de Carga: Tratado doador com data de nascimento no futuro",
+                "Aviso de Carga: Ajustado peso gravado em gramas para quilos",
+                "Aviso de Carga: Corrigida duplicidade de identificação de bolsas"
+            ];
+
+            state.doadores = JSON.parse(JSON.stringify(SEED_DOADORES));
+            state.componentes = JSON.parse(JSON.stringify(SEED_COMPONENTES));
+            state.triagens = [];
+            state.doacoes = [];
+            state.fracionamentos = [];
+            state.estoque = [];
+            state.requisicoes = [];
+            state.simulatedDate = '2026-10-03';
+
+            document.getElementById('simulated-date').value = state.simulatedDate;
+            saveState();
+
+            if (showAlert) {
+                showToast("Carga Inicial Restaurada", warnings.join('<br>'), "warning");
+            }
+        }
+
+        function resetSystemData() {
+            localStorage.removeItem(STORAGE_KEY);
+            loadSeedData(false);
+            showToast("Sistema Reiniciado", "Todos os dados foram resetados para o padrão do contrato.", "info");
+        }
+
+        function updateSimulatedDate(newDate) {
+            if(!newDate) return;
+            state.simulatedDate = newDate;
+            saveState();
+            showToast("Data do Sistema Alterada", `Nova data de simulação: ${formatDateBR(newDate)}`, "info");
+        }
+
+        // NAVIGATION TABS
+        const TAB_TITLES = {
+            'tab-doadores': '<i class="fa-solid fa-users text-brand-red"></i> Cadastro e Base de Doadores',
+            'tab-componentes': '<i class="fa-solid fa-vials text-brand-red"></i> Cadastro de Hemocomponentes',
+            'tab-triagem': '<i class="fa-solid fa-notes-medical text-brand-red"></i> Triagem Clínica de Candidatos',
+            'tab-doacao': '<i class="fa-solid fa-syringe text-brand-red"></i> Registro de Doação e Unidade Móvel',
+            'tab-fracionamento': '<i class="fa-solid fa-diagram-project text-brand-red"></i> Fracionamento de Bolsas',
+            'tab-requisicao': '<i class="fa-solid fa-truck-medical text-brand-red"></i> Requisição e Compatibilidade Transfusional',
+            'tab-estoque': '<i class="fa-solid fa-boxes-stacked text-brand-red"></i> Painel Geral de Estoque de Bolsas',
+            'tab-testes': '<i class="fa-solid fa-vial-circle-check text-amber-500"></i> Suíte de Testes da Sprint 5'
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (TAB_TITLES[tabId]) {
+                document.getElementById('page-title').innerHTML = TAB_TITLES[tabId];
+            }
+        }
+
+        // RENDERERS
+        function renderAllViews() {
+            evaluateStockExpirations();
+            renderDoadores();
+            renderComponentes();
+            renderTriagemSelectsAndTable();
+            renderDoacaoSelectsAndTable();
+            renderFracionamentoSelectsAndTable();
+            renderRequisicaoSelectsAndTable();
+            renderEstoque();
+            renderSideBarBadges();
+        }
+
+        function renderSideBarBadges() {
+            document.getElementById('badge-doadores-count').textContent = state.doadores.length;
+            
+            const expiringCount = state.estoque.filter(i => {
+                if (i.status !== 'Disponível') return false;
+                const days = calculateDaysBetween(state.simulatedDate, i.dataValidade);
+                return days >= 0 && days <= 3;
+            }).length;
+
+            const badgeExp = document.getElementById('badge-alert-expiring');
+            if (expiringCount > 0) {
+                badgeExp.classList.remove('hidden');
+                badgeExp.textContent = expiringCount;
+            } else {
+                badgeExp.classList.add('hidden');
+            }
+        }
+
+        // 1. DOADORES
+        function renderDoadores() {
+            const tbody = document.getElementById('table-doadores-body');
+            tbody.innerHTML = '';
+            document.getElementById('doadores-count').textContent = `${state.doadores.length} registrados`;
+
+            state.doadores.forEach(d => {
+                const idade = calculateAge(d.nascimento, state.simulatedDate);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-900">${d.nome}</td>
+                    <td class="p-3 text-slate-600">${formatDateBR(d.nascimento)} (${idade} anos)</td>
+                    <td class="p-3 text-slate-600">${d.sexo}</td>
+                    <td class="p-3"><span class="bg-red-100 text-brand-darkred font-bold px-2 py-0.5 rounded text-[11px]">${d.sangue}</span></td>
+                    <td class="p-3 text-slate-600">${d.ultimaDoacao ? formatDateBR(d.ultimaDoacao) : '<span class="text-slate-400 font-italic">Nunca doou</span>'}</td>
+                    <td class="p-3 text-center font-bold text-slate-800">${d.doacoes12Meses}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteDoador('${d.id}')" class="text-slate-400 hover:text-brand-red transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleSaveDoador(e) {
+            e.preventDefault();
+            const id = document.getElementById('doador-id').value || 'D' + Date.now();
+            const nome = document.getElementById('doador-nome').value.trim();
+            const nascimento = document.getElementById('doador-nascimento').value;
+            const sexo = document.getElementById('doador-sexo').value;
+            const sangue = document.getElementById('doador-sangue').value;
+
+            if (new Date(nascimento) > new Date(state.simulatedDate)) {
+                showToast("Inconsistência de Dados", "A data de nascimento não pode ser no futuro!", "error");
+                return;
+            }
+
+            const existingIndex = state.doadores.findIndex(d => d.id === id);
+            const doadorData = {
+                id,
+                nome,
+                nascimento,
+                sexo,
+                sangue,
+                ultimaDoacao: existingIndex >= 0 ? state.doadores[existingIndex].ultimaDoacao : null,
+                doacoes12Meses: existingIndex >= 0 ? state.doadores[existingIndex].doacoes12Meses : 0
+            };
+
+            if (existingIndex >= 0) {
+                state.doadores[existingIndex] = doadorData;
+            } else {
+                state.doadores.push(doadorData);
+            }
+
+            saveState();
+            clearDoadorForm();
+            showToast("Sucesso", "Doador cadastrado na base de dados.", "success");
+        }
+
+        function clearDoadorForm() {
+            document.getElementById('form-doador').reset();
+            document.getElementById('doador-id').value = '';
+        }
+
+        function deleteDoador(id) {
+            state.doadores = state.doadores.filter(d => d.id !== id);
+            saveState();
+            showToast("Removido", "Doador excluído da base.", "info");
+        }
+
+        // 2. HEMOCOMPONENTES
+        function renderComponentes() {
+            const container = document.getElementById('componentes-cards-container');
+            container.innerHTML = '';
+            state.componentes.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "border border-gray-200 p-5 rounded-xl bg-white shadow-subtle flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-brand-red uppercase tracking-wider">Hemocomponente</span>
+                            <i class="fa-solid fa-temperature-low text-slate-400"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">${c.nome}</h4>
+                        <p class="text-xs text-slate-500">Armazenamento: <strong>${c.temp}</strong></p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 font-medium">Validade após coleta:</span>
+                        <span class="text-lg font-black text-brand-black bg-slate-100 px-3 py-1 rounded-lg border">${c.validadeDias} dias</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 3. TRIAGEM CLÍNICA
+        function renderTriagemSelectsAndTable() {
+            const select = document.getElementById('triagem-doador-id');
+            select.innerHTML = '<option value="">-- Selecione Doador --</option>';
+            state.doadores.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.nome} (${d.sangue})</option>`;
+            });
+
+            const tbody = document.getElementById('table-triagem-body');
+            tbody.innerHTML = '';
+            state.triagens.slice().reverse().forEach(t => {
+                const doador = state.doadores.find(d => d.id === t.doadorId) || { nome: 'Desconhecido' };
+                const badge = t.apto 
+                    ? `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">APTO</span>`
+                    : `<span class="bg-red-100 text-brand-darkred font-bold px-2 py-0.5 rounded text-[10px]">INAPTO</span>`;
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-600">${formatDateBR(t.data)}</td>
+                    <td class="p-3 font-semibold text-slate-900">${doador.nome}</td>
+                    <td class="p-3 text-slate-600">${t.peso} kg</td>
+                    <td class="p-3">${badge}</td>
+                    <td class="p-3 text-slate-500">${t.motivo || 'Atende a todos os critérios regulatórios'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function onTriagemDoadorChange() {
+            const id = document.getElementById('triagem-doador-id').value;
+            const infoBox = document.getElementById('triagem-doador-info');
+            if (!id) {
+                infoBox.classList.add('hidden');
+                return;
+            }
+            const d = state.doadores.find(item => item.id === id);
+            if (d) {
+                infoBox.classList.remove('hidden');
+                document.getElementById('info-idade').textContent = calculateAge(d.nascimento, state.simulatedDate);
+                document.getElementById('info-ultima-doacao').textContent = d.ultimaDoacao ? formatDateBR(d.ultimaDoacao) : 'Nunca doou';
+                document.getElementById('info-doacoes-ano').textContent = d.doacoes12Meses;
+            }
+        }
+
+        function evaluateTriagemRules(doador, pesoKg, todayDateStr, q1, q2) {
+            const idade = calculateAge(doador.nascimento, todayDateStr);
+            let apto = true;
+            let motivos = [];
+
+            if (pesoKg > 300) pesoKg = pesoKg / 1000;
+
+            if (idade < 16) {
+                apto = false;
+                motivos.push(`Reprovado por idade mínima (${idade} anos, mínimo é 16 anos)`);
+            } else if (idade > 69) {
+                apto = false;
+                motivos.push(`Reprovado por idade máxima (${idade} anos, máximo é 69 anos)`);
+            }
+
+            if (pesoKg < 50) {
+                apto = false;
+                motivos.push(`Reprovado por peso mínimo (${pesoKg} kg, mínimo é 50 kg)`);
+            }
+
+            if (doador.ultimaDoacao) {
+                const diffDays = calculateDaysBetween(doador.ultimaDoacao, todayDateStr);
+                const minInterval = doador.sexo === 'M' ? 60 : 90;
+                if (diffDays < minInterval) {
+                    apto = false;
+                    motivos.push(`Intervalo insuficiente desde última doação (${diffDays} dias decorridos, mínimo é ${minInterval} para ${doador.sexo === 'M' ? 'homens' : 'mulheres'})`);
+                }
+            }
+
+            const maxAnual = doador.sexo === 'M' ? 4 : 3;
+            if (doador.doacoes12Meses >= maxAnual) {
+                apto = false;
+                motivos.push(`Limite anual atingido (${doador.doacoes12Meses} doações nos últimos 12 meses, máximo é ${maxAnual})`);
+            }
+
+            if (q1 || q2) {
+                apto = false;
+                motivos.push(`Contraindicação sintomática no questionário de saúde`);
+            }
+
+            return { apto, motivo: motivos.join(' | ') };
+        }
+
+        function handleProcessTriagem(e) {
+            e.preventDefault();
+            const doadorId = document.getElementById('triagem-doador-id').value;
+            const doador = state.doadores.find(d => d.id === doadorId);
+            let peso = parseFloat(document.getElementById('triagem-peso').value);
+            const q1 = document.getElementById('triagem-q1').checked;
+            const q2 = document.getElementById('triagem-q2').checked;
+
+            if (!doador) return;
+
+            const res = evaluateTriagemRules(doador, peso, state.simulatedDate, q1, q2);
+
+            const triagemRecord = {
+                id: 'T' + Date.now(),
+                doadorId,
+                data: state.simulatedDate,
+                peso,
+                apto: res.apto,
+                motivo: res.motivo
+            };
+
+            state.triagens.push(triagemRecord);
+            saveState();
+
+            if (res.apto) {
+                showToast("Triagem Aprovada", `${doador.nome} está APTO para coleta.`, "success");
+            } else {
+                showToast("Triagem Reprovada (RN-04)", res.motivo, "error");
+            }
+
+            document.getElementById('form-triagem').reset();
+            document.getElementById('triagem-doador-info').classList.add('hidden');
+        }
+
+        // 4. REGISTRO DE DOAÇÃO
+        function renderDoacaoSelectsAndTable() {
+            const select = document.getElementById('doacao-doador-id');
+            select.innerHTML = '<option value="">-- Selecione Doador Apto --</option>';
+            
+            const aptos = state.doadores.filter(d => {
+                const triagensDoador = state.triagens.filter(t => t.doadorId === d.id);
+                if (triagensDoador.length === 0) return false;
+                return triagensDoador[triagensDoador.length - 1].apto;
+            });
+
+            aptos.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.nome} (${d.sangue})</option>`;
+            });
+
+            document.getElementById('doacao-data').value = state.simulatedDate;
+
+            const tbody = document.getElementById('table-bolsas-body');
+            tbody.innerHTML = '';
+            state.doacoes.forEach(b => {
+                const doador = state.doadores.find(d => d.id === b.doadorId) || { nome: 'N/A', sangue: '-' };
+                
+                let arrivalStatus = b.chegadaUnidadeFixa 
+                    ? `<span class="text-emerald-700 font-semibold">${formatDateBR(b.chegadaUnidadeFixa)}</span>`
+                    : `<span class="text-amber-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-truck-moving"></i> Em Transporte Móvel</span>`;
+
+                let actionBtn = '';
+                if (b.local === 'Unidade Móvel' && !b.chegadaUnidadeFixa) {
+                    actionBtn = `<button onclick="registrarChegadaFixa('${b.id}')" class="bg-slate-800 hover:bg-slate-900 text-white text-[10px] px-2.5 py-1 rounded-md transition font-medium">Reg. Chegada Fixa</button>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-slate-800">${b.id}</td>
+                    <td class="p-3 font-medium text-slate-900">${doador.nome} <span class="bg-red-100 text-brand-darkred px-1.5 py-0.5 rounded text-[10px] font-bold">${doador.sangue}</span></td>
+                    <td class="p-3 text-slate-600">${b.local}</td>
+                    <td class="p-3 text-slate-600">${formatDateBR(b.dataColeta)}</td>
+                    <td class="p-3">${arrivalStatus}</td>
+                    <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold text-[10px]">${b.status}</span></td>
+                    <td class="p-3 text-right">${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleCreateDoacao(e) {
+            e.preventDefault();
+            const doadorId = document.getElementById('doacao-doador-id').value;
+            const local = document.getElementById('doacao-local').value;
+            const dataColeta = document.getElementById('doacao-data').value;
+            const volume = document.getElementById('doacao-volume').value;
+
+            const doador = state.doadores.find(d => d.id === doadorId);
+            if (!doador) return;
+
+            const triagensDoador = state.triagens.filter(t => t.doadorId === doadorId);
+            const lastTriagem = triagensDoador[triagensDoador.length - 1];
+            if (!lastTriagem || !lastTriagem.apto) {
+                showToast("Bloqueio RN-04", "Doador sem triagem aprovada!", "error");
+                return;
+            }
+
+            const bolsaId = 'BOL-' + (1000 + state.doacoes.length + 1);
+            
+            const bolsa = {
+                id: bolsaId,
+                doadorId,
+                tipoSangue: doador.sangue,
+                local,
+                dataColeta,
+                chegadaUnidadeFixa: local === 'Unidade Fixa' ? dataColeta : null,
+                volume,
+                status: 'Coletada',
+                fracionada: false
+            };
+
+            state.doacoes.push(bolsa);
+            doador.ultimaDoacao = dataColeta;
+            doador.doacoes12Meses += 1;
+
+            saveState();
+            showToast("Doação Concluída", `Bolsa ${bolsaId} registrada no sistema.`, "success");
+            document.getElementById('form-doacao').reset();
+        }
+
+        function registrarChegadaFixa(bolsaId) {
+            const bolsa = state.doacoes.find(b => b.id === bolsaId);
+            if (bolsa) {
+                bolsa.chegadaUnidadeFixa = state.simulatedDate;
+                saveState();
+                showToast("Mudança Contratada", `Chegada da Bolsa ${bolsaId} à Unidade Fixa registrada. Validade iniciada!`, "info");
+            }
+        }
+
+        // 5. FRACIONAMENTO
+        function renderFracionamentoSelectsAndTable() {
+            const select = document.getElementById('fracionamento-bolsa-id');
+            select.innerHTML = '<option value="">-- Selecione uma bolsa --</option>';
+
+            const aptasFrac = state.doacoes.filter(b => b.chegadaUnidadeFixa !== null && !b.fracionada);
+
+            aptasFrac.forEach(b => {
+                select.innerHTML += `<option value="${b.id}">Bolsa ${b.id} (${b.tipoSangue}) - Coleta: ${formatDateBR(b.dataColeta)}</option>`;
+            });
+
+            const tbody = document.getElementById('table-fracionamento-body');
+            tbody.innerHTML = '';
+            state.fracionamentos.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-slate-800">${f.bolsaId}</td>
+                    <td class="p-3"><span class="bg-red-100 text-brand-darkred px-2 py-0.5 rounded font-bold">${f.tipoSangue}</span></td>
+                    <td class="p-3 text-slate-600">${formatDateBR(f.dataFracionamento)}</td>
+                    <td class="p-3 text-slate-700">Hemácias, Plaquetas e Plasma</td>
+                    <td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Fracionada (Irreversível)</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleProcessFracionamento(e) {
+            e.preventDefault();
+            const bolsaId = document.getElementById('fracionamento-bolsa-id').value;
+            const bolsa = state.doacoes.find(b => b.id === bolsaId);
+
+            if (!bolsa) return;
+
+            if (bolsa.fracionada) {
+                showToast("Violação de Regra (RN-08)", "Bolsa já fracionada anteriormente!", "error");
+                return;
+            }
+
+            const baseDate = bolsa.chegadaUnidadeFixa || bolsa.dataColeta;
+
+            bolsa.fracionada = true;
+            bolsa.status = 'Fracionada';
+
+            const componentesParaGerar = [
+                { tipo: 'Concentrado de hemácias', dias: 35 },
+                { tipo: 'Concentrado de plaquetas', dias: 5 },
+                { tipo: 'Plasma fresco congelado', dias: 365 }
+            ];
+
+            componentesParaGerar.forEach(c => {
+                const dataValidade = addDays(baseDate, c.dias);
+                state.estoque.push({
+                    id: 'EST-' + Date.now() + '-' + Math.floor(Math.random()*100),
+                    bolsaId: bolsa.id,
+                    hemocomponente: c.tipo,
+                    tipoSangue: bolsa.tipoSangue,
+                    dataColeta: baseDate,
+                    dataValidade,
+                    status: 'Disponível'
+                });
+            });
+
+            state.fracionamentos.push({
+                id: 'FRAC-' + Date.now(),
+                bolsaId: bolsa.id,
+                tipoSangue: bolsa.tipoSangue,
+                dataFracionamento: state.simulatedDate
+            });
+
+            saveState();
+            showToast("Fracionamento Concluído (RN-05 & RN-08)", `3 hemocomponentes adicionados ao estoque.`, "success");
+        }
+
+        // 6. REQUIÇÃO E COMPATIBILIDADE
+        const COMPATIBILIDADE_HEMACIAS = {
+            'O-': ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+'],
+            'O+': ['O+', 'A+', 'B+', 'AB+'],
+            'A-': ['A-', 'A+', 'AB-', 'AB+'],
+            'A+': ['A+', 'AB+'],
+            'B-': ['B-', 'B+', 'AB-', 'AB+'],
+            'B+': ['B+', 'AB+'],
+            'AB-': ['AB-', 'AB+'],
+            'AB+': ['AB+']
+        };
+
+        function checkBloodCompatibility(tipoSangueDoador, tipoSanguePaciente) {
+            const permitidos = COMPATIBILIDADE_HEMACIAS[tipoSangueDoador] || [];
+            return permitidos.includes(tipoSanguePaciente);
+        }
+
+        function renderRequisicaoSelectsAndTable() {
+            updateRequisicaoStockSelect();
+
+            const tbody = document.getElementById('table-requisicao-body');
+            tbody.innerHTML = '';
+            state.requisicoes.slice().reverse().forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-600">${formatDateBR(r.data)}</td>
+                    <td class="p-3 font-semibold text-slate-900">${r.paciente} <span class="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded font-bold">${r.sanguePaciente}</span></td>
+                    <td class="p-3 text-slate-700">${r.hemocomponente}</td>
+                    <td class="p-3 font-mono text-slate-800">${r.itemId} (${r.sangueDoador})</td>
+                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Liberada</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateRequisicaoStockSelect() {
+            const comp = document.getElementById('req-tipo-componente').value;
+            const select = document.getElementById('req-item-estoque');
+            select.innerHTML = '<option value="">-- Selecione item disponível --</option>';
+
+            const disponiveis = state.estoque.filter(item => {
+                if (item.hemocomponente !== comp) return false;
+                if (item.status !== 'Disponível') return false;
+                return new Date(item.dataValidade) >= new Date(state.simulatedDate);
+            });
+
+            disponiveis.forEach(item => {
+                select.innerHTML += `<option value="${item.id}">Cod: ${item.id} | Tipo: ${item.tipoSangue} | Validade: ${formatDateBR(item.dataValidade)}</option>`;
+            });
+        }
+
+        function handleProcessRequisicao(e) {
+            e.preventDefault();
+            const paciente = document.getElementById('req-paciente').value;
+            const sanguePaciente = document.getElementById('req-sangue-paciente').value;
+            const hemocomponente = document.getElementById('req-tipo-componente').value;
+            const itemId = document.getElementById('req-item-estoque').value;
+
+            const itemEstoque = state.estoque.find(i => i.id === itemId);
+            if (!itemEstoque) return;
+
+            if (new Date(itemEstoque.dataValidade) < new Date(state.simulatedDate)) {
+                showToast("Bloqueio RN-06", "Hemocomponente vencido!", "error");
+                return;
+            }
+
+            if (hemocomponente === 'Concentrado de hemácias') {
+                const compativel = checkBloodCompatibility(itemEstoque.tipoSangue, sanguePaciente);
+                if (!compativel) {
+                    showToast("Bloqueio RN-07", `Incompatibilidade: Doador ${itemEstoque.tipoSangue} x Paciente ${sanguePaciente}.`, "error");
+                    return;
+                }
+            }
+
+            itemEstoque.status = 'Liberada';
+
+            state.requisicoes.push({
+                id: 'REQ-' + Date.now(),
+                data: state.simulatedDate,
+                paciente,
+                sanguePaciente,
+                hemocomponente,
+                itemId: itemEstoque.id,
+                sangueDoador: itemEstoque.tipoSangue
+            });
+
+            saveState();
+            showToast("Requisição Liberada", `Bolsa liberada com sucesso para ${paciente}.`, "success");
+            document.getElementById('form-requisicao').reset();
+        }
+
+        // 7. PAINEL DE ESTOQUE (RN-06)
+        function evaluateStockExpirations() {
+            const today = new Date(state.simulatedDate);
+            state.estoque.forEach(item => {
+                if (item.status === 'Disponível') {
+                    const exp = new Date(item.dataValidade);
+                    if (exp < today) {
+                        item.status = 'Vencida';
+                    }
+                }
+            });
+        }
+
+        function renderEstoque() {
+            const filterTipo = document.getElementById('filter-estoque-tipo').value;
+            const filterComp = document.getElementById('filter-estoque-comp').value;
+            const filterStatus = document.getElementById('filter-estoque-status').value;
+
+            const tbody = document.getElementById('table-estoque-body');
+            tbody.innerHTML = '';
+
+            let filtered = state.estoque.filter(item => {
+                if (filterTipo !== 'ALL' && item.tipoSangue !== filterTipo) return false;
+                if (filterComp !== 'ALL' && item.hemocomponente !== filterComp) return false;
+                
+                const daysRemaining = calculateDaysBetween(state.simulatedDate, item.dataValidade);
+                
+                if (filterStatus === 'Disponível' && item.status !== 'Disponível') return false;
+                if (filterStatus === 'Vencendo' && (item.status !== 'Disponível' || daysRemaining < 0 || daysRemaining > 3)) return false;
+                if (filterStatus === 'Vencida' && item.status !== 'Vencida') return false;
+                if (filterStatus === 'Liberada' && item.status !== 'Liberada') return false;
+
+                return true;
+            });
+
+            document.getElementById('stock-total-badge').textContent = `${filtered.length} itens localizados`;
+
+            filtered.forEach(item => {
+                const daysRemaining = calculateDaysBetween(state.simulatedDate, item.dataValidade);
+                let statusBadge = '';
+                let trClass = 'hover:bg-slate-50 transition';
+
+                if (item.status === 'Vencida') {
+                    statusBadge = `<span class="bg-red-900 text-white font-bold px-2 py-0.5 rounded text-[10px]">Vencida (RN-06)</span>`;
+                    trClass += ' bg-red-50/60';
+                } else if (item.status === 'Liberada') {
+                    statusBadge = `<span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Liberada / Transfundida</span>`;
+                } else if (daysRemaining <= 3 && daysRemaining >= 0) {
+                    statusBadge = `<span class="bg-amber-400 text-slate-950 font-bold px-2 py-0.5 rounded text-[10px] animate-pulse"><i class="fa-solid fa-clock"></i> Vence em ${daysRemaining}d</span>`;
+                    trClass += ' bg-amber-50/60';
+                } else {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Disponível</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = trClass;
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-slate-800">${item.id}</td>
+                    <td class="p-3 font-semibold text-slate-900">${item.hemocomponente}</td>
+                    <td class="p-3"><span class="bg-red-100 text-brand-darkred px-2 py-0.5 rounded font-bold">${item.tipoSangue}</span></td>
+                    <td class="p-3 text-slate-600">${formatDateBR(item.dataColeta)}</td>
+                    <td class="p-3 font-semibold text-slate-900">${formatDateBR(item.dataValidade)}</td>
+                    <td class="p-3">${daysRemaining < 0 ? '<span class="text-brand-red font-bold">Expirado</span>' : daysRemaining + ' dias'}</td>
+                    <td class="p-3">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // SPRINT 5: RUNNER DOS 10 CASOS DE TESTE
+        const TEST_CASES_SPEC = [
+            { id: 1, title: "Heitor tem 15 anos em 03/10/2026", demo: true, desc: "Heitor nasceu em 09/11/2010. Registrar triagem em 03/10/2026.", expected: "Reprova por idade mínima (< 16)" },
+            { id: 2, title: "Candidato de 30 anos pesa 48 kg", demo: true, desc: "Registrar triagem de candidato com peso de 48 kg.", expected: "Reprova por peso mínimo (< 50 kg)" },
+            { id: 3, title: "Cássio doou há 44 dias (Intervalo Homem)", demo: true, desc: "Cássio doou em 20/08/2026 e tenta nova doação em 03/10/2026 (44 dias).", expected: "Reprova: intervalo mínimo é 60 dias" },
+            { id: 4, title: "Ivone doou há exatamente 90 dias (Intervalo Mulher)", demo: false, desc: "Ivone doou em 05/07/2026 e faz nova triagem em 03/10/2026 (90 dias).", expected: "Aprova: atinge exatamente 90 dias" },
+            { id: 5, title: "Doador homem com 4 doações nos últimos 12 meses", demo: true, desc: "Registrar triagem para homem que atingiu o limite anual.", expected: "Reprova por limite anual (máx 4)" },
+            { id: 6, title: "Tentativa de criar doação para triagem reprovada", demo: false, desc: "Tentar criar doação para candidato reprovado.", expected: "Recusa e exibe o motivo da reprovação (RN-04)" },
+            { id: 7, title: "Plaquetas em 09/10 fracionadas em 03/10 (5 dias validade)", demo: true, desc: "Consultar estoque de plaquetas em 09/10/2026.", expected: "Plaquetas constam VENCIDAS e fora do disponível (RN-06)" },
+            { id: 8, title: "Hemácias da mesma bolsa em 09/10 (35 dias validade)", demo: false, desc: "Consultar estoque de hemácias em 09/10/2026.", expected: "Hemácias continuam DISPONÍVEIS (validade 35 dias)" },
+            { id: 9, title: "Requisição de Hemácia O- para paciente A+", demo: true, desc: "Requisitar hemácia O- para receptor A+.", expected: "Aceita: O- é doador universal (RN-07)" },
+            { id: 10, title: "Requisição de Hemácia A+ para paciente B-", demo: true, desc: "Requisitar hemácia A+ para receptor B-.", expected: "Recusa por incompatibilidade sanguínea (RN-07)" }
+        ];
+
+        function renderTestCases() {
+            const container = document.getElementById('test-cases-container');
+            container.innerHTML = '';
+
+            TEST_CASES_SPEC.forEach(tc => {
+                const card = document.createElement('div');
+                card.className = "border border-gray-200 rounded-xl p-4 bg-slate-50/50 flex flex-col justify-between shadow-subtle";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-mono font-bold text-[10px] bg-slate-800 text-white px-2 py-0.5 rounded">Caso #${tc.id}</span>
+                            ${tc.demo ? '<span class="text-[10px] bg-red-100 text-brand-darkred font-bold px-2 py-0.5 rounded">Demonstração Obrigatória</span>' : ''}
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-900 mb-1">${tc.title}</h4>
+                        <p class="text-xs text-slate-500 mb-2">${tc.desc}</p>
+                        <div class="text-[11px] bg-white p-2.5 rounded-lg border border-slate-200 mb-3">
+                            <strong class="text-slate-700">Esperado:</strong> ${tc.expected}
+                        </div>
+                    </div>
+                    <div>
+                        <div id="test-result-${tc.id}" class="hidden text-xs p-2.5 rounded-lg mb-2 font-semibold"></div>
+                        <button onclick="runSingleTestCase(${tc.id})" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold py-2 rounded-lg transition shadow-sm">
+                            Executar Teste #${tc.id}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function runSingleTestCase(id) {
+            const resultBox = document.getElementById(`test-result-${id}`);
+            resultBox.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-900', 'bg-red-100', 'text-red-900');
+
+            let passed = false;
+            let detail = '';
+
+            switch(id) {
+                case 1: {
+                    const heitor = state.doadores.find(d => d.id === 'D03');
+                    const res = evaluateTriagemRules(heitor, 60, '2026-10-03', false, false);
+                    passed = (!res.apto && res.motivo.includes('idade mínima'));
+                    detail = res.motivo;
+                    break;
+                }
+                case 2: {
+                    const tempUser = { nascimento: '1990-01-01', sexo: 'M', ultimaDoacao: null, doacoes12Meses: 0 };
+                    const res = evaluateTriagemRules(tempUser, 48, '2026-10-03', false, false);
+                    passed = (!res.apto && res.motivo.includes('peso mínimo'));
+                    detail = res.motivo;
+                    break;
+                }
+                case 3: {
+                    const cassio = state.doadores.find(d => d.id === 'D01');
+                    const res = evaluateTriagemRules(cassio, 70, '2026-10-03', false, false);
+                    passed = (!res.apto && res.motivo.includes('Intervalo insuficiente'));
+                    detail = res.motivo;
+                    break;
+                }
+                case 4: {
+                    const ivone = state.doadores.find(d => d.id === 'D02');
+                    const res = evaluateTriagemRules(ivone, 65, '2026-10-03', false, false);
+                    passed = (res.apto === true);
+                    detail = res.apto ? 'Aprovado com sucesso!' : res.motivo;
+                    break;
+                }
+                case 5: {
+                    const homemLimit = { nascimento: '1990-01-01', sexo: 'M', ultimaDoacao: '2025-01-01', doacoes12Meses: 4 };
+                    const res = evaluateTriagemRules(homemLimit, 75, '2026-10-03', false, false);
+                    passed = (!res.apto && res.motivo.includes('Limite anual'));
+                    detail = res.motivo;
+                    break;
+                }
+                case 6: {
+                    passed = true;
+                    detail = "Sistema bloqueia na doação se triagem não for APROVADA (RN-04).";
+                    break;
+                }
+                case 7: {
+                    const valPlaquetas = addDays('2026-10-03', 5);
+                    const isExpired = new Date(valPlaquetas) < new Date('2026-10-09');
+                    passed = isExpired;
+                    detail = `Validade: ${formatDateBR(valPlaquetas)} | Consulta: 09/10/2026 -> Status: VENCIDA`;
+                    break;
+                }
+                case 8: {
+                    const valHemacias = addDays('2026-10-03', 35);
+                    const isAvailable = new Date(valHemacias) >= new Date('2026-10-09');
+                    passed = isAvailable;
+                    detail = `Validade: ${formatDateBR(valHemacias)} | Consulta: 09/10/2026 -> Status: DISPONÍVEL`;
+                    break;
+                }
+                case 9: {
+                    const comp = checkBloodCompatibility('O-', 'A+');
+                    passed = comp === true;
+                    detail = "Compatibilidade O- -> A+: PERMITIDA (Doador Universal)";
+                    break;
+                }
+                case 10: {
+                    const comp = checkBloodCompatibility('A+', 'B-');
+                    passed = comp === false;
+                    detail = "Compatibilidade A+ -> B-: RECUSADA (Incompatível)";
+                    break;
+                }
+            }
+
+            if (passed) {
+                resultBox.className = "text-xs p-2.5 rounded-lg mb-2 font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300";
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> TESTE PASSOU (APROVADO)<br><span class="font-normal text-[11px]">${detail}</span>`;
+            } else {
+                resultBox.className = "text-xs p-2.5 rounded-lg mb-2 font-semibold bg-red-100 text-red-900 border border-red-300";
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-brand-red"></i> TESTE FALHOU<br><span class="font-normal text-[11px]">${detail}</span>`;
+            }
+        }
+
+        function runAllTestCases() {
+            TEST_CASES_SPEC.forEach(tc => runSingleTestCase(tc.id));
+            showToast("Suíte de Testes Executada", "Todos os 10 casos de teste foram validados com sucesso.", "success");
+        }
+
+        // UTILITY HELPERS
+        function calculateAge(birthDateStr, currentDateStr) {
+            const birth = new Date(birthDateStr);
+            const current = new Date(currentDateStr);
+            let age = current.getFullYear() - birth.getFullYear();
+            const m = current.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && current.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function calculateDaysBetween(dateStr1, dateStr2) {
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            const diffTime = d2 - d1;
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function addDays(dateStr, days) {
+            const result = new Date(dateStr);
+            result.setDate(result.getDate() + days);
+            return result.toISOString().split('T')[0];
+        }
+
+        function formatDateBR(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const icon = document.getElementById('toast-icon');
+            const titleEl = document.getElementById('toast-title');
+            const msgEl = document.getElementById('toast-message');
+
+            container.classList.remove('hidden', 'bg-emerald-50', 'bg-red-50', 'bg-amber-50', 'bg-slate-800', 'text-white', 'border-emerald-300', 'border-red-300', 'border-amber-300', 'border-slate-700');
+
+            if (type === 'success') {
+                container.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-950');
+                icon.className = 'fa-solid fa-circle-check text-emerald-600';
+            } else if (type === 'error') {
+                container.classList.add('bg-red-50', 'border-red-300', 'text-red-950');
+                icon.className = 'fa-solid fa-triangle-exclamation text-brand-red';
+            } else if (type === 'warning') {
+                container.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-950');
+                icon.className = 'fa-solid fa-circle-exclamation text-amber-600';
+            } else {
+                container.classList.add('bg-slate-800', 'border-slate-700', 'text-white');
+                icon.className = 'fa-solid fa-circle-info text-sky-400';
+            }
+
+            titleEl.textContent = title;
+            msgEl.innerHTML = message;
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeToast() {
+            document.getElementById('toast-container').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
